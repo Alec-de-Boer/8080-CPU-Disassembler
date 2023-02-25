@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "opCodeInitilization.h"
+#include <algorithm>
 
 int main()
 {
@@ -263,7 +264,7 @@ int main()
                         opCodeName = "LXI";
                         excessBytesUsed = 2;
                         goThroughByteChecker = true;
-                        prefix = "D,#$";
+                        prefix = "H,#$";
                         break;
                     case 0x22:
                         opCodeName = "SHLD";
@@ -1622,73 +1623,43 @@ int main()
                 {
                     std::vector<std::string> excessBytesVector;
                     std::stringstream singleByte;
-                    
-                    for(int byteTracker = i + 1; byteTracker <= i + excessBytesUsed; ++byteTracker)
+    
+                    for (int byteTracker = i + 1; byteTracker <= i + excessBytesUsed; ++byteTracker)
                     {
-                        singleByte << std::hex << std::setfill('0') << std::setw(2) << (int)memblock.at(byteTracker);
+                        singleByte << std::hex << std::setfill('0') << std::setw(2) << (int) memblock.at(byteTracker);
                         std::string bytesString = singleByte.str();
                         excessBytesVector.push_back(bytesString);
                         singleByte.str("");
                     }
-                    
+    
                     std::stringstream bytesSS;
-                    for (auto it = excessBytesVector.begin(); it!=excessBytesVector.end(); ++it)
+                    for (auto it = excessBytesVector.begin(); it != excessBytesVector.end(); ++it)
                     {
                         if (it != excessBytesVector.begin())
                         {
-                            bytesSS<<" ";
+                            bytesSS << " ";
                         }
                         bytesSS << *it;
                     }
-                    
+    
                     //std::copy(excessBytesVector.begin(), excessBytesVector.end(),std::ostream_iterator<std::string>(bytesSS));
                     byteStreamToString = bytesSS.str();
                     std::cout << byteStreamToString;
                     bytesSS.str("");
-                    
-                    
-                    //vector to temporarily store ints
-                    std::vector<int> tempIntStorage;
-                    
-                    //vector to store the eventual sorted hex numbers
-                    std::vector<std::string> hexSortedVector;
-                    
-                    for (int x = 0; x < excessBytesVector.size(); ++x)
+    
+                    std::reverse(excessBytesVector.begin(), excessBytesVector.end());
+    
+                    std::stringstream hexStream;
+                    for (auto it = excessBytesVector.begin(); it != excessBytesVector.end(); ++it)
                     {
-                        int tempSingleByte;
-                        std::ostringstream excessByteSorted;
-                        excessByteSorted << excessBytesVector.at(x);
-                        std::string excessStringSorted = excessByteSorted.str();
-                        //convert items in array to int
-                        tempSingleByte = std::stoi(excessBytesVector.at(x), 0, 16);
-                        tempIntStorage.push_back(tempSingleByte);
-                    }
-                    
-                    //sort items in ascending order
-                    std::sort(tempIntStorage.begin(), tempIntStorage.end());
-                    
-                    //convert items back to hex
-                    for (int y = 0; y < tempIntStorage.size(); ++y)
-                    {
-                       std::ostringstream hexSortedStream;
-                       hexSortedStream << std::hex << std::setfill('0') << std::setw(2) << tempIntStorage.at(y);
-                       std::string tempHex = hexSortedStream.str();
-                       hexSortedVector.push_back(tempHex);
-                    }
-                    
-                    std::stringstream hexSortedFinal;
-                    //loop through vector, adding spaces and converting to string.
-                    for (auto it = hexSortedVector.begin(); it!=hexSortedVector.end(); ++it)
-                    {
-                        if (it != hexSortedVector.begin())
+                        if (it != excessBytesVector.begin())
                         {
-                            hexSortedFinal<<"";
+                            hexStream << "";
                         }
-                        hexSortedFinal << *it;
+                        hexStream << *it;
                     }
-                    hexResult = hexSortedFinal.str();
+                    hexResult = hexStream.str();
                 }
-                
                 std::string result = counterString + " " + opCodeName + "    " + prefix + hexResult;
                 assemblyOutput << result << std::endl;
                 assemblyOutput.close();
